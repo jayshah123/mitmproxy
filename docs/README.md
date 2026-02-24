@@ -66,6 +66,33 @@ Can config YAML hold an addon implementation?
 - **No**. YAML cannot embed executable addon code.
 - **Yes** for referencing addon files via `scripts:`.
 
+### Launch with a Custom Config YAML (Important)
+
+There is no direct `--config /path/file.yaml` flag.
+
+mitmproxy loads config only from:
+
+1. `<confdir>/config.yaml`
+2. `<confdir>/config.yml`
+
+So to use a custom config, point `confdir` to a directory containing one of those filenames:
+
+```bash
+mitmproxy --set confdir=/absolute/path/to/my-mitm-config-dir
+mitmdump --set confdir=/absolute/path/to/my-mitm-config-dir
+mitmweb --set confdir=/absolute/path/to/my-mitm-config-dir
+```
+
+Example layout:
+
+```text
+/absolute/path/to/my-mitm-config-dir/
+  config.yaml
+  myaddon.py
+```
+
+If your file is named differently (for example `dev.yaml`), rename/copy/symlink it to `config.yaml` in that directory.
+
 Useful commands:
 
 ```bash
