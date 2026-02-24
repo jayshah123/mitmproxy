@@ -46,3 +46,94 @@ What this shows:
 - `self.num` belongs to the addon instance and persists across requests.
 - `flow` is per-request/per-transaction data.
 - `response` is the hook name and indicates when this code runs.
+
+## Quickstart: Common Switches, Config YAML, and Custom Addons
+
+mitmproxy reads config from `~/.mitmproxy/config.yaml` (or `config.yml`) by default.
+
+Useful commands:
+
+```bash
+# Show all options with defaults (canonical option reference)
+mitmproxy --options
+
+# Show all command signatures
+mitmproxy --commands
+
+# Run with common runtime switches
+mitmproxy --mode regular --listen-host 127.0.0.1 --listen-port 8080 --showhost
+
+# Disable upstream TLS verification (debug use only)
+mitmproxy -k
+
+# Override options ad hoc
+mitmproxy --set block_global=false --set confdir=~/.mitmproxy-dev
+```
+
+Common switches (CLI aliases for options):
+
+- `--mode` / `-m`: Proxy mode, e.g. `regular`, `reverse:https://example.com`, `socks5`.
+- `--listen-host`: Bind address.
+- `--listen-port` / `-p`: Bind port.
+- `--showhost`: Display URL host from `Host` header.
+- `-k` / `--ssl-insecure`: Do not verify upstream TLS certs.
+- `--set key=value`: Set any option explicitly.
+- `-s` / `--scripts`: Load custom addon script(s).
+- `-q` / `-v`: Quiet / verbose logging.
+
+### Sample `config.yaml`
+
+```yaml
+# ~/.mitmproxy/config.yaml
+mode:
+  - regular
+
+listen_host: 127.0.0.1
+listen_port: 8080
+
+showhost: true
+ssl_insecure: false
+
+ignore_hosts:
+  - '(^|\\.)example\\.com:443$'
+
+scripts:
+  - ./examples/addons/http-add-header.py
+```
+
+Notes:
+
+- `mode`, `ignore_hosts`, and `scripts` are sequences in YAML.
+- Script paths in config are resolved relative to the config file directory.
+
+### Invoke mitmproxy with a custom addon
+
+Minimal addon:
+
+```python
+# myaddon.py
+class MyAddon:
+    def request(self, flow):
+        flow.request.headers["x-lab"] = "1"
+
+addons = [MyAddon()]
+```
+
+Run with each tool:
+
+```bash
+# Interactive TUI
+mitmproxy -s ./myaddon.py
+
+# CLI/non-interactive
+mitmdump -s ./myaddon.py
+
+# Web UI
+mitmweb -s ./myaddon.py
+```
+
+Pass addon options at startup:
+
+```bash
+mitmdump -s ./myaddon.py --set some_addon_option=true
+```
