@@ -51,6 +51,21 @@ What this shows:
 
 mitmproxy reads config from `~/.mitmproxy/config.yaml` (or `config.yml`) by default.
 
+### Config vs Addons (Important)
+
+- **Config (`config.yaml`)** is data: option values such as `mode`, `listen_port`, `ignore_hosts`, feature flags, and addon-specific option values.
+- **Addons** are code: Python files/classes that implement hooks such as `request(self, flow)` and `response(self, flow)`.
+
+How they combine:
+
+1. Put addon script paths under `scripts:` in config (or pass `-s` on CLI).
+2. Put addon option values in the same config file.
+
+Can config YAML hold an addon implementation?
+
+- **No**. YAML cannot embed executable addon code.
+- **Yes** for referencing addon files via `scripts:`.
+
 Useful commands:
 
 ```bash
